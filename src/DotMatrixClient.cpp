@@ -12,13 +12,16 @@
 #include "../Telegram/TelegramDisplay.h"
 
 #include <Telegram/Telegram.h>
+#include <Telegram/TelegramObject.h>
 #include <Logging/LoggerAdapter.h>
+
+using namespace EventSystem;
 
 namespace DotMatrix {
 
 DotMatrixClient::DotMatrixClient()
 {
-	this->espi = new EventSystemParticipantImpl("DISPLAY_CLIENT");
+	this->espi = new EventSystemClient("DISPLAY_CLIENT");
 	espi->connectToMaster();
 
 	LoggerAdapter::initLoggerAdapter(espi);
@@ -39,20 +42,21 @@ void DotMatrixClient::getDisplayInfo()
 {
 	//TODO: send telegram to display, receive information
 	Telegram t("DISPLAY");
-	t.setType(REQUEST);
+	t.setType(Telegram::REQUEST);
 	espi->send(&t);
 
-	Telegram_Dimension td(0, 0);
-	void* data = malloc(td.getSerializedSize());
+	Telegram_Object* objTelegram = new Telegram_Object();
+	DisplayPosition* pos = new DisplayPosition();
+	void* data = malloc(64);
 
 	espi->receive(data, false);
 
-	td.deserialize(data);
+	objTelegram->deserialize(data, pos);
 
-	if (td.getType() == DISPLAYDIMENSION)
+	if (objTelegram->getType() == Telegram::DISPLAYDIMENSION)
 	{
-		this->xResolution = td.getXResolution();
-		this->yResolution = td.getYResolution();
+		this->xResolution = pos->getXPosition();
+		this->yResolution = pos->getYPosition();
 	}
 	else
 	{
@@ -62,6 +66,7 @@ void DotMatrixClient::getDisplayInfo()
 
 void DotMatrixClient::display(List* list)
 {
+	Telegram_Object* objTelegram = new Telegram_Object();
 	int fontSize = Font::getFontHeight(list->getFont());
 	int displayableEntries = this->yResolution / fontSize;
 
@@ -102,8 +107,8 @@ void DotMatrixClient::display(List* list)
 		{
 			entry.setInverted(true);
 		}
-		Telegram_Display td(entry);
-		espi->send(&td);
+		objTelegram->setObject(&entry);
+		espi->send(objTelegram);
 
 		yBegin += fontSize;
 	}

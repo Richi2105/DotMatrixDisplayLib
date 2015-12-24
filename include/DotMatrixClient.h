@@ -8,7 +8,9 @@
 #ifndef DOTMATRIXCLIENT_H_
 #define DOTMATRIXCLIENT_H_
 
-#include <EventSystemParticipantImpl.h>
+#include <EventSystemClient.h>
+
+using namespace EventSystem;
 
 namespace DotMatrix {
 
@@ -41,7 +43,7 @@ private:
 
 	int xResolution, yResolution;
 
-	EventSystemParticipantImpl* espi;
+	EventSystemClient* espi;
 };
 
 } /* namespace DotMatrix */

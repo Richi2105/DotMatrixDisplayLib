@@ -11,7 +11,7 @@
 #include <Telegram/Telegram.h>
 #include "../include/DisplayString.h"
 
-class Telegram_Display: public Telegram {
+class Telegram_Display: public EventSystem::Telegram {
 public:
 	Telegram_Display(DisplayString s);
 	Telegram_Display();
