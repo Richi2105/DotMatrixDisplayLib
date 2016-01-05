@@ -77,7 +77,7 @@ DisplayPosition DisplayBoundary::getEnd()
 	return this->end;
 }
 
-int16_t DisplayBoundary::getSerializedSize()
+int DisplayBoundary::getSerializedSize()
 {
 	int16_t size = 0;
 	size += this->begin.getSerializedSize();

@@ -11,19 +11,19 @@
 #include <string>
 #include <vector>
 #include "fonts.h"
-#include "DotMatrixClient.h"
+#include "DisplayCommunication.h"
 
 namespace DotMatrix {
 
-class List {
+class DisplayList {
 public:
-	List(DotMatrixClient::relative_boundary b, DotMatrixClient::side_align side);
-	virtual ~List();
+	DisplayList(DisplayCommunication::relative_boundary b, DisplayCommunication::side_align side);
+	virtual ~DisplayList();
 
 	/**
-	 * sets the DotMatrixClient, so list can be displayed
+	 * sets the CommunicationModule, so list can be displayed
 	 */
-	static void setDotMatrixClient(DotMatrixClient* dmclient);
+	static void setCommunicationModule(DisplayCommunication* dmclient);
 
 	/**
 	 * adds an entry to the list
@@ -31,6 +31,11 @@ public:
 	 * returns the size of the list
 	 */
 	int addEntry(std::string entry);
+
+	/**
+	 * @return: the numbers of entries inside the list
+	 */
+	int getSize();
 
 	/**
 	 * sets an entry to be displayed inverted
@@ -68,12 +73,12 @@ public:
 	/**
 	 * returns the relative size in x-direction of the list
 	 */
-	DotMatrixClient::relative_boundary getBoundary();
+	DisplayCommunication::relative_boundary getBoundary();
 
 	/**
 	 * returns the side alignment of the list
 	 */
-	DotMatrixClient::side_align getSideAlign();
+	DisplayCommunication::side_align getSideAlign();
 
 	/**
 	 * returns whether the previous selected entry was above or below the current selected entry,
@@ -82,13 +87,10 @@ public:
 	 */
 	bool isScrollingDown();
 
-	std::string getEntryAt(int index)
-	{
-		return list[index];
-	}
+	std::string getEntryAt(int index);
 
 private:
-	static DotMatrixClient* dmclient;
+	static DisplayCommunication* dmclient;
 
 	std::vector<std::string> list;
 
@@ -100,8 +102,8 @@ private:
 
 	Font::font_t font;
 
-	DotMatrixClient::relative_boundary boundary;
-	DotMatrixClient::side_align side;
+	DisplayCommunication::relative_boundary boundary;
+	DisplayCommunication::side_align side;
 
 };
 

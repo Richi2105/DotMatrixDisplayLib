@@ -3,12 +3,15 @@
 
 #include "Displayable.h"
 #include "DisplayBoundary.h"
-#include "DisplayCommunication.h"
 #include "Characters.h"
 #include "fonts.h"
 #include <string>
+#include "DisplayCommunicationVoid.h"
 
 #define DISPLAYSTRINGSIZE 30
+
+namespace DotMatrix
+{
 
 class DisplayString : public Serializeable, Displayable
 {
@@ -38,7 +41,7 @@ class DisplayString : public Serializeable, Displayable
         /**
          * set the DisplayCommunication module. This sets the module for all DisplayStrings
          */
-        static void setCommunicationModule(DisplayCommunication * module);
+        static void setCommunicationModule(DisplayCommunication* module);
 
         /**
          * returns the position of the string (upper left corner)
@@ -87,19 +90,21 @@ class DisplayString : public Serializeable, Displayable
 
         void display();
 
-        virtual int16_t getSerializedSize();
+        virtual int getSerializedSize();
     	virtual int serialize(void* const data);
     	virtual int deserialize(void const * const data);
 
     protected:
     private:
-    	void setCommunicationModule();
+//    	void setCommunicationModule();
     	bool inverted;
 //    	Font* font;
     	Font::font_t fontType;
-        static DisplayCommunication * communicationModule;
+        static DisplayCommunication* communicationModule;
         DisplayBoundary box;
-        std::string str;
+        char str[DISPLAYSTRINGSIZE];
 };
+
+} /* namespace DotMatrix */
 
 #endif // DISPLAYSTRING_H

@@ -37,7 +37,7 @@ void DisplayPosition::setYPosition(int ypos)
 	this->yPosition = ypos;
 }
 
-int16_t DisplayPosition::getSerializedSize()
+int DisplayPosition::getSerializedSize()
 {
 	int16_t size = 0;
 	size += sizeof(this->xPosition);

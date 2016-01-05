@@ -2,11 +2,15 @@
 #include "../Fonts/Standard8mono.h"
 #include <cstdio>
 
-DisplayCommunication * DisplayString::communicationModule = nullptr;
+namespace DotMatrix
+{
+
+DisplayCommunication* DisplayString::communicationModule = nullptr;
 
 DisplayString::DisplayString(DisplayPosition begin, DisplayPosition end, std::string str) : box(begin, end)
 {
-    this->str = str;
+	memset(this->str, 0, DISPLAYSTRINGSIZE);
+    memcpy(this->str, str.c_str(), DISPLAYSTRINGSIZE < str.size() ? DISPLAYSTRINGSIZE : str.size());
 //    this->font = new Standard_8_mono();
     this->fontType = Font::standard_8_mono;
     this->inverted = false;
@@ -15,7 +19,8 @@ DisplayString::DisplayString(DisplayPosition begin, DisplayPosition end, std::st
 
 DisplayString::DisplayString(int x, int y, int length, std::string str)
 {
-    this->str = str;
+	memset(this->str, 0, DISPLAYSTRINGSIZE);
+    memcpy(this->str, str.c_str(), DISPLAYSTRINGSIZE < str.size() ? DISPLAYSTRINGSIZE : str.size());
 //    this->font = new Standard_8_mono();
     this->fontType = Font::standard_8_mono;
     this->box = DisplayBoundary(x, y, x+length, y+Font::getFontHeight(this->fontType));
@@ -35,11 +40,11 @@ DisplayString::~DisplayString()
     //dtor
 }
 
-void DisplayString::setCommunicationModule(DisplayCommunication * module)
+void DisplayString::setCommunicationModule(DisplayCommunication* module)
 {
     DisplayString::communicationModule = module;
 }
-
+/*
 void DisplayString::setCommunicationModule()
 {
 	if (DisplayString::communicationModule == nullptr)
@@ -47,7 +52,7 @@ void DisplayString::setCommunicationModule()
 		DisplayString::communicationModule = DisplayCommunication::getSingleton();
 	}
 }
-
+*/
 DisplayPosition DisplayString::getPositionBegin()
 {
     return this->box.getBegin();
@@ -75,7 +80,8 @@ std::string DisplayString::getString()
 
 void DisplayString::setString(std::string str)
 {
-    this->str = str;
+	memset(this->str, 0, DISPLAYSTRINGSIZE);
+    memcpy(this->str, str.c_str(), DISPLAYSTRINGSIZE < str.size() ? DISPLAYSTRINGSIZE : str.size());
 }
 
 void DisplayString::setFont(Font::font_t f)
@@ -110,7 +116,8 @@ void DisplayString::setInverted(bool invert)
 
 void DisplayString::display()
 {
-    uint8_t data[122];
+/*
+    unsigned char data[122];
     int iterator = 0;
     int charPosition = 0;
     for (char c : str)
@@ -127,9 +134,12 @@ void DisplayString::display()
         }
     }
     DisplayString::communicationModule->sendToDisplay(this->box.getXPosBegin(), this->box.getYPosBegin(), iterator, data);
+*/
+	if (DisplayString::communicationModule != nullptr)
+		DisplayString::communicationModule->display(this);
 }
 
-int16_t DisplayString::getSerializedSize()
+int DisplayString::getSerializedSize()
 {
 	int16_t size = 0;
 	size += sizeof(char) * DISPLAYSTRINGSIZE;
@@ -141,7 +151,7 @@ int16_t DisplayString::getSerializedSize()
 int DisplayString::serialize(void* const data)
 {
 	MEMUNIT* data2 = (MEMUNIT*)data;
-	packNData(data2, this->str.c_str(), DISPLAYSTRINGSIZE);
+	packNData(data2, this->str, DISPLAYSTRINGSIZE);
 	packData(data2, this->inverted);
 	packData(data2, this->fontType);
 	data2 += this->box.serialize(data2);
@@ -150,11 +160,11 @@ int DisplayString::serialize(void* const data)
 int DisplayString::deserialize(void const * const data)
 {
 	const MEMUNIT* data2 = (MEMUNIT*)data;
-	char string[DISPLAYSTRINGSIZE];
-	unpackNData(data2, string, DISPLAYSTRINGSIZE);
-	this->str = string;
+	unpackNData(data2, this->str, DISPLAYSTRINGSIZE);
 	unpackData(data2, this->inverted);
 	unpackData(data2, this->fontType);
 	data2 += this->box.deserialize(data2);
 	return this->getSerializedSize();
 }
+
+} /* namespace DotMatrix */

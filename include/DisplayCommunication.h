@@ -1,63 +1,46 @@
-#ifndef DISPLAYCOMMUNICATION_H
-#define DISPLAYCOMMUNICATION_H
+/*
+ * DisplayCommunication.h
+ *
+ *  Created on: Dec 25, 2015
+ *      Author: richard
+ */
 
-#include <cstdint>
+#ifndef INCLUDE_DISPLAYCOMMUNICATION_H_
+#define INCLUDE_DISPLAYCOMMUNICATION_H_
 
 
-class DisplayCommunication
+
+namespace DotMatrix
 {
-    public:
-        ~DisplayCommunication();
 
-        void sendToDisplay(int xPos, int yPos, int numOfBytes, uint8_t * data);
+class DisplayList;
+class DisplayString;
 
-        static DisplayCommunication * getSingleton();
-        static void initSingleton(int xResolution, int yResolution);
+class DisplayCommunication {
+public:
 
-        void clearDisplay();
+	/**
+	 * this represents the boundary of an displayable object (e.g. the size in x_direction)
+	 */
+	static enum relative_boundary {FOURTH, HALF, THREE_FOURTHS, FULL} boundary;
 
-        int getXResolution();
-        int getYResolution();
+	/**
+	 * this represents the relative y-position of an displayable object
+	 */
+	static enum relative_YPosition {TOP, TOP_CENTER, CENTER, BOTTOM_CENTER, BOTTOM} yPosition;
 
-        int getCurrentXPositon();
+	/**
+	 * this represents the alignment of an displayable object
+	 */
+	static enum side_align {LEFT, MIDDLE, RIGHT} align;
 
-        static const uint8_t DISPLAY_START_COMMAND = 0xC0;
-        static const uint8_t DISPLAY_CS1 = 0x01;
-        static const uint8_t DISPLAY_CS2 = 0x02;
-        static const uint8_t DISPLAY_A0 = 0x08;
+	virtual void display(DisplayList* list) = 0;
+	virtual void display(DisplayString* string) = 0;
+//	virtual void sendToDisplay(int xPos, int yPos, int numOfBytes, unsigned char* data, bool inverted) = 0;
+	virtual ~DisplayCommunication();
 
-        static const uint8_t COMMAND_DISPLAY_ON = 0xAF;
-        static const uint8_t COMMAND_DISPLAY_OFF = 0xAE;
-        static const uint8_t COMMAND_DISPLAY_STATIC_DRIVE_ON = 0xA5;
-        static const uint8_t COMMAND_DISPLAY_STATIC_DRIVE_OFF = 0xA4;
-
-        static const uint8_t COMMAND_DISPLAY_START_LINE = 0xC0;
-        static const uint8_t COMMAND_DISPLAY_START_COLUMN = 0x00;
-        static const uint8_t COMMAND_DISPLAY_START_PAGE = 0xB8;
-
-        static const uint8_t COMMAND_DISPLAY_INCREMENT_CLOCKWISE = 0xA0;
-        static const uint8_t COMMAND_DISPLAY_INCREMENT_COUNTERCLOCKWISE = 0xA1;
-
-        static const uint8_t COMMAND_DISPLAY_RESET = 0xE2;
-    protected:
-    private:
-        DisplayCommunication(int xResolution, int yResolution);
-        void setPosition(int xPosition, int yPosition, bool bothSides);
-        void transmit();
-        int fillTransmitBuffer(int numOfBytes, uint8_t * data);
-
-        static DisplayCommunication * singletonPointer;
-
-        int xResolution;
-        int yResolution;
-
-        int xPosition;
-        int yPosition;
-
-        unsigned char transmitData[150];
-        int numberOfData;
-
-        int fdSPI;
 };
 
-#endif // DISPLAYCOMMUNICATION_H
+} /* namespace DotMatrix */
+
+#endif /* INCLUDE_DISPLAYCOMMUNICATION_H_ */
