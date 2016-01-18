@@ -18,6 +18,8 @@ DisplayList::DisplayList(DisplayCommunication::relative_boundary b, DisplayCommu
 		;//TODO: check
 	}
 
+	this->list = new std::vector<std::string>();
+
 	this->side = side;
 	this->boundary = b;
 	this->font = Font::standard_8_mono;
@@ -40,24 +42,40 @@ void DisplayList::setCommunicationModule(DisplayCommunication* dmclient)
 
 int DisplayList::addEntry(std::string entry)
 {
-	this->list.push_back(entry);
+	this->list->push_back(entry);
 	this->entry_nr += 1;
 	return this->entry_nr;
 }
 
 int DisplayList::getSize()
 {
-	return this->list.size();
+	return this->list->size();
 }
 
 void DisplayList::selectEntry(int entry)
 {
-	if (entry < this->entry_nr)
-	{
-		this->previous_selected_entry = this->selected_entry;
-		this->selected_entry = entry;
-	}
+    if (entry < this->getSize() && entry >= 0)
+    {
+        this->previous_selected_entry = this->selected_entry;
+        this->selected_entry = entry;
+    }
+    else if (entry >= this->getSize())
+        selectEntry(this->getSize()-1);
+    else if (entry < 0)
+        selectEntry(0);
 
+}
+
+int DisplayList::scrollDown(int step)
+{
+    this->selectEntry(this->selected_entry + step);
+    return this->selected_entry;
+}
+
+int DisplayList::scrollUp(int step)
+{
+    this->selectEntry(this->selected_entry - step);
+    return this->selected_entry;
 }
 
 int DisplayList::getSelectedEntry()
@@ -67,6 +85,9 @@ int DisplayList::getSelectedEntry()
 
 void DisplayList::clear()
 {
+	this->list->clear();
+	this->selected_entry = -1;
+	this->previous_selected_entry = -1;
 	//TODO clear vector, call display();
 }
 
@@ -108,12 +129,23 @@ bool DisplayList::isScrollingDown()
 	}
 }
 
-std::string DisplayList::getEntryAt(int index)
+std::string DisplayList::getEntryAt(unsigned int index)
 {
-	if (index < this->list.size() && index >= 0)
-		return list[index];
+	if (index < this->list->size())
+		return list->at(index);
 	else
 		return " ";
+}
+
+std::vector<std::string>* DisplayList::getList()
+{
+	return this->list;
+}
+void DisplayList::setList(std::vector<std::string>* list)
+{
+	this->selected_entry = -1;
+	this->previous_selected_entry = -1;
+	this->list = list;
 }
 
 } /* namespace DotMatrix */

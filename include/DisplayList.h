@@ -43,6 +43,15 @@ public:
 	 */
 	void selectEntry(int entry);
 
+    /**
+     * scroll the list down step values
+     * @param step the number of values to scroll down
+     * @return the now selected entry
+     */
+    int scrollDown(int step);
+
+    int scrollUp(int step);
+
 	/**
 	 * returns the index of the selected entry
 	 */
@@ -87,12 +96,17 @@ public:
 	 */
 	bool isScrollingDown();
 
-	std::string getEntryAt(int index);
+	std::string getEntryAt(unsigned int index);
+
+	std::vector<std::string>* getList();
+	void setList(std::vector<std::string>* list);
+
+
 
 private:
 	static DisplayCommunication* dmclient;
 
-	std::vector<std::string> list;
+	std::vector<std::string>* list;
 
 	int entry_nr;
 	int prevous_entry_nr;

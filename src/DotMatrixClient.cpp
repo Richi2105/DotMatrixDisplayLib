@@ -138,9 +138,9 @@ void DotMatrixClient::display(DisplayList* list)
 		{
 			this->stringList[i].setString(list->getEntryAt(index_start));
 			if (index_start == selectedEntry)
-			{
 				this->stringList[i].setInverted(true);
-			}
+			else
+				this->stringList[i].setInverted(false);
 			index_start += 1;
 			objTelegram->setObject(&this->stringList[i]);
 			this->espi->send(objTelegram);
