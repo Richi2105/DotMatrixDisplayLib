@@ -1,5 +1,5 @@
 //#include "include/DisplayCommunication.h"
-#include "../include/DisplayCommunicationVoid.h"
+#include "DisplayCommunicationVoid.h"
 
 #define DEBUG
 

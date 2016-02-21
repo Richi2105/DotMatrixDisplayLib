@@ -1,12 +1,14 @@
 #ifndef DISPLAYPOSITION_H
 #define DISPLAYPOSITION_H
 
-//#include <Serializeable.h>
-#include "/home/richard/workspace/EventSystemLib/include/Serializeable.h"
+#include <Serializeable.h>
+//#include "/home/richard/workspace/EventSystemLib/include/Serializeable.h"
 
+class DisplayBoundary;
 
 class DisplayPosition : public Serializeable
 {
+	friend class DisplayBoundary;
     public:
         DisplayPosition(int x, int y);
         DisplayPosition();

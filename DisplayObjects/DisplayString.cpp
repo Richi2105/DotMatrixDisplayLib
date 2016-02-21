@@ -1,11 +1,12 @@
-#include "../include/DisplayString.h"
+#include "../DisplayObjects/DisplayString.h"
+
 #include "../Fonts/Standard8mono.h"
-#include <cstdio>
+#include <stdio.h>
 
 namespace DotMatrix
 {
 
-DisplayCommunication* DisplayString::communicationModule = nullptr;
+//DisplayCommunication* DisplayString::communicationModule = nullptr;
 
 DisplayString::DisplayString(DisplayPosition begin, DisplayPosition end, std::string str) : box(begin, end)
 {
@@ -39,11 +40,12 @@ DisplayString::~DisplayString()
 {
     //dtor
 }
-
+/*
 void DisplayString::setCommunicationModule(DisplayCommunication* module)
 {
     DisplayString::communicationModule = module;
 }
+*/
 /*
 void DisplayString::setCommunicationModule()
 {
@@ -135,8 +137,13 @@ void DisplayString::display()
     }
     DisplayString::communicationModule->sendToDisplay(this->box.getXPosBegin(), this->box.getYPosBegin(), iterator, data);
 */
-	if (DisplayString::communicationModule != nullptr)
-		DisplayString::communicationModule->display(this);
+	if (Displayable::dispCom != nullptr)
+		Displayable::dispCom->display(this);
+}
+
+DisplayBoundary* DisplayString::getBoundary()
+{
+	return &this->box;
 }
 
 int DisplayString::getSerializedSize()
@@ -150,6 +157,7 @@ int DisplayString::getSerializedSize()
 }
 int DisplayString::serialize(void* const data)
 {
+	printf("DisplayString::serialize()\n");
 	MEMUNIT* data2 = (MEMUNIT*)data;
 	packNData(data2, this->str, DISPLAYSTRINGSIZE);
 	packData(data2, this->inverted);
@@ -157,8 +165,10 @@ int DisplayString::serialize(void* const data)
 	data2 += this->box.serialize(data2);
 	return this->getSerializedSize();
 }
+
 int DisplayString::deserialize(void const * const data)
 {
+	printf("DisplayString::deserialize()\n");
 	const MEMUNIT* data2 = (MEMUNIT*)data;
 	unpackNData(data2, this->str, DISPLAYSTRINGSIZE);
 	unpackData(data2, this->inverted);

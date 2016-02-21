@@ -1,19 +1,19 @@
 #ifndef DISPLAYSTRING_H
 #define DISPLAYSTRING_H
 
-#include "Displayable.h"
-#include "DisplayBoundary.h"
-#include "Characters.h"
-#include "fonts.h"
+#include "../Positioning/DisplayBoundary.h"
+#include "../include/Characters.h"
+#include "../include/fonts.h"
 #include <string>
-#include "DisplayCommunicationVoid.h"
+#include "DisplayableSerializeable.h"
+#include "../ComModules/DisplayCommunicationVoid.h"
 
 #define DISPLAYSTRINGSIZE 30
 
 namespace DotMatrix
 {
 
-class DisplayString : public Serializeable, Displayable
+class DisplayString : public DisplayableSerializeable
 {
     public:
 		/**
@@ -41,7 +41,7 @@ class DisplayString : public Serializeable, Displayable
         /**
          * set the DisplayCommunication module. This sets the module for all DisplayStrings
          */
-        static void setCommunicationModule(DisplayCommunication* module);
+        //static void setCommunicationModule(DisplayCommunication* module);
 
         /**
          * returns the position of the string (upper left corner)
@@ -88,7 +88,8 @@ class DisplayString : public Serializeable, Displayable
          */
         void setInverted(bool invert);
 
-        void display();
+        virtual void display();
+        virtual DisplayBoundary* getBoundary();
 
         virtual int getSerializedSize();
     	virtual int serialize(void* const data);
@@ -100,7 +101,7 @@ class DisplayString : public Serializeable, Displayable
     	bool inverted;
 //    	Font* font;
     	Font::font_t fontType;
-        static DisplayCommunication* communicationModule;
+//      static DisplayCommunication* communicationModule;
         DisplayBoundary box;
         char str[DISPLAYSTRINGSIZE];
 };

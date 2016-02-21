@@ -10,20 +10,24 @@
 
 #include <string>
 #include <vector>
-#include "fonts.h"
-#include "DisplayCommunication.h"
+#include "Displayable.h"
+#include "../include/fonts.h"
+#include "../ComModules/DisplayCommunication.h"
+#include "../Positioning/DisplayBoundary.h"
 
 namespace DotMatrix {
 
-class DisplayList {
+//TODO: not the communication module, but the list should have information about it's own entries and their absolute position on the display.
+
+class DisplayList : public Displayable {
 public:
-	DisplayList(DisplayCommunication::relative_boundary b, DisplayCommunication::side_align side);
+	DisplayList(DisplayCommunication::relative_boundary b, DisplayCommunication::side_align side, int visibleRows = 0);
 	virtual ~DisplayList();
 
 	/**
 	 * sets the CommunicationModule, so list can be displayed
 	 */
-	static void setCommunicationModule(DisplayCommunication* dmclient);
+	//static void setCommunicationModule(DisplayCommunication* dmclient);
 
 	/**
 	 * adds an entry to the list
@@ -66,7 +70,22 @@ public:
 	 * displays the list on the display, with the selected entry in focus
 	 * this must be called when changes are done to the list (except for clear())
 	 */
-	void display();
+	virtual void display();
+
+	/**
+	 * @return: the number of entries visible in the display
+	 */
+	int getVisibleEntries();
+
+	/**
+	 * @return: a reference to the vector with all currently visible entries
+	 */
+	std::vector<DisplayString*>* getEntries();
+
+	/**
+	 * @return the boundary of this list
+	 */
+	virtual DisplayBoundary* getBoundary();
 
 	/**
 	 * sets the font of the list.
@@ -82,7 +101,7 @@ public:
 	/**
 	 * returns the relative size in x-direction of the list
 	 */
-	DisplayCommunication::relative_boundary getBoundary();
+	DisplayCommunication::relative_boundary getRelativeBoundary();
 
 	/**
 	 * returns the side alignment of the list
@@ -104,8 +123,11 @@ public:
 
 
 private:
-	static DisplayCommunication* dmclient;
+//	static DisplayCommunication* dmclient;
 
+	void initList(int visibleRows);
+
+	std::vector<DisplayString*>* visibleEntries;
 	std::vector<std::string>* list;
 
 	int entry_nr;
@@ -114,10 +136,13 @@ private:
 	int selected_entry;
 	int previous_selected_entry;
 
+	int visibleEntryNrs;
+
 	Font::font_t font;
 
 	DisplayCommunication::relative_boundary boundary;
 	DisplayCommunication::side_align side;
+	DisplayBoundary absoluteBoundary;
 
 };
 

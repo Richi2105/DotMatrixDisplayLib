@@ -10,7 +10,12 @@
 
 #include <vector>
 #include <EventSystemClient.h>
+
+#include "../DisplayObjects/DisplayList.h"
+#include "../DisplayObjects/DisplayProgressBar.h"
+#include "../DisplayObjects/DisplayString.h"
 #include "DisplayCommunication.h"
+
 
 using namespace EventSystem;
 
@@ -25,18 +30,19 @@ public:
 
 	virtual void display(DisplayList* list);
 	virtual void display(DisplayString* string);
+	virtual void display(DisplayProgressBar* bar);
 
-	int getXResolution();
-	int getYResolution();
+	virtual int getXResolution();
+	virtual int getYResolution();
 
 private:
-	void getDisplayInfo();
+	int getDisplayInfo();
 	void initList(DisplayCommunication::relative_boundary boundary, DisplayCommunication::side_align side, Font::font_t font);
 
-	std::vector<DisplayString> stringList;
+//	std::vector<DisplayString> stringList;
 	DisplayList* lastList;
 
-	int xResolution, yResolution;
+//	int xResolution, yResolution;
 
 	EventSystemClient* espi;
 };

@@ -19,8 +19,8 @@ class DisplayCommunicationVoid : public DisplayCommunication
 
     protected:
     private:
-        int xResolution;
-        int yResolution;
+//      int xResolution;
+//      int yResolution;
 
 };
 

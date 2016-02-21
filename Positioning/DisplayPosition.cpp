@@ -1,4 +1,4 @@
-#include "../include/DisplayPosition.h"
+#include "DisplayPosition.h"
 #include <OS_DEF.h>
 
 DisplayPosition::DisplayPosition(int x, int y)

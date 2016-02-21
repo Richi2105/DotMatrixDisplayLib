@@ -5,14 +5,14 @@
  *      Author: richard
  */
 
-#include "../include/DisplayString.h"
-#include "../include/DotMatrixClient.h"
+#include "DotMatrixClient.h"
 #include <Telegram/Telegram.h>
 #include <Telegram/TelegramObject.h>
 #include <Logging/LoggerAdapter.h>
-#include "../include/DisplayList.h"
-
 #include <math.h>
+#include "../DisplayObjects/DisplayList.h"
+#include "../DisplayObjects/DisplayString.h"
+#include "../include/DisplayObject.h"
 
 using namespace EventSystem;
 
@@ -22,6 +22,7 @@ DotMatrixClient::DotMatrixClient()
 {
 	this->espi = new EventSystemClient(Telegram::ID_DISPLAYCLIENT);
 	espi->connectToMaster();
+//	espi->startReceiving();
 
 	LoggerAdapter::initLoggerAdapter(espi);
 
@@ -31,23 +32,30 @@ DotMatrixClient::DotMatrixClient()
 	this->xResolution = 0;
 	this->yResolution = 0;
 
+	this->espi->statemachine->setState(StateMachine::EVENTSYSTEM_STATE_RECEIVING);
 	this->espi->startReceiving();
 
-	this->getDisplayInfo();
-
-	this->espi->stopReceiving();
+	if (this->getDisplayInfo() == -1)
+	{
+		//TODO: throw
+	}
+	this->espi->statemachine->setState(StateMachine::EVENTSYSTEM_STATE_DONE);
+	this->espi->stopReceiving(true);
 
 }
 
 DotMatrixClient::~DotMatrixClient()
 {
+	delete this->espi;
 
 }
 
-void DotMatrixClient::getDisplayInfo()
+int DotMatrixClient::getDisplayInfo()
 {
+	int retVal = 0;
 	LoggerAdapter::log(Log::INFO, "Getting Display Information");
 	Telegram t(Telegram::ID_DISPLAY);
+	t.setSource(this->espi->getUniqueIdentifier());
 	t.setType(Telegram::REQUEST);
 	espi->send(&t);
 
@@ -55,26 +63,34 @@ void DotMatrixClient::getDisplayInfo()
 	DisplayPosition* pos = new DisplayPosition();
 	void* data = malloc(512);
 
-	espi->receive(data, false);
+	int bytes = espi->receive(data, 5);
 
 	printf("DotMatrixClient::getDisplayInfo(): after receive\n");
-	objTelegram->deserialize(data, pos);
-
-
-	if (objTelegram->getType() == Telegram::DISPLAYDIMENSION)
+	if (bytes > 0)
 	{
-		printf("DotMatrixClient::getDisplayInfo(): setting Resolution\n");
-		this->xResolution = pos->getXPosition();
-		this->yResolution = pos->getYPosition();
-		LoggerAdapter::log(Log::INFO, "Display Information received");
+		objTelegram->deserialize(data, pos);
+
+
+		if (objTelegram->getType() == Telegram::REQUESTANSWER)
+		{
+			printf("DotMatrixClient::getDisplayInfo(): setting Resolution\n");
+			this->xResolution = pos->getXPosition();
+			this->yResolution = pos->getYPosition();
+			LoggerAdapter::log(Log::INFO, "Display Information received");
+		}
+		else
+		{
+			LoggerAdapter::log(Log::WARNING, "DotMatrixClient: Wrong telegram has been received");
+		}
+		printf("DotMatrixClient::getDisplayInfo(): after deserialize\n");
 	}
 	else
 	{
-		LoggerAdapter::log(Log::WARNING, "DotMatrixClient: Wrong telegram has been received");
+		retVal = -1;
 	}
-	printf("DotMatrixClient::getDisplayInfo(): after deserialize\n");
+	return retVal;
 }
-
+/*
 void DotMatrixClient::initList(DisplayCommunication::relative_boundary boundary, DisplayCommunication::side_align side, Font::font_t font)
 {
 	int fontSize = Font::getFontHeight(font);
@@ -113,6 +129,7 @@ void DotMatrixClient::initList(DisplayCommunication::relative_boundary boundary,
 	}
 
 }
+*/
 
 void DotMatrixClient::display(DisplayList* list)
 {
@@ -120,8 +137,20 @@ void DotMatrixClient::display(DisplayList* list)
 	{
 		Telegram_Object* objTelegram = new Telegram_Object();
 		objTelegram->setIdentifier("DISPLAY");
+		objTelegram->setSource(this->espi->getUniqueIdentifier());
 		objTelegram->setType(Telegram::DISPLAYDATA);
-		int fontSize = Font::getFontHeight(list->getFont());
+		DisplayObject* dobj = new DisplayObject();
+		objTelegram->setObject(dobj);
+
+		for (DisplayString* s : *(list->getEntries()))
+		{
+			dobj->setObject(s);
+			this->espi->send(objTelegram);
+		}
+		delete dobj;
+		delete objTelegram;
+
+/*		int fontSize = Font::getFontHeight(list->getFont());
 		int displayableEntries = this->yResolution / fontSize;
 
 		int selectedEntry = list->getSelectedEntry();
@@ -149,16 +178,33 @@ void DotMatrixClient::display(DisplayList* list)
 	else
 	{
 		this->lastList = list;
-		this->initList(list->getBoundary(), list->getSideAlign(), list->getFont());
+		this->initList(list->getRelativeBoundary(), list->getSideAlign(), list->getFont());
 		this->display(list);
+	}
+*/
 	}
 }
 
 void DotMatrixClient::display(DisplayString* string)
 {
-	Telegram_Object* objTelegram = new Telegram_Object(Telegram::ID_DISPLAY, string);
+	DisplayObject* dobj = new DisplayObject(string, DOBJECT_DSTRING);
+	Telegram_Object* objTelegram = new Telegram_Object(Telegram::ID_DISPLAY, dobj);
+	objTelegram->setSource(this->espi->getUniqueIdentifier());
 	objTelegram->setType(Telegram::DISPLAYDATA);
 	this->espi->send(objTelegram);
+	delete dobj;
+	delete objTelegram;
+}
+
+void DotMatrixClient::display(DisplayProgressBar* bar)
+{
+	DisplayObject* dobj = new DisplayObject(bar, DOBJECT_DPBAR);
+	Telegram_Object* objTelegram = new Telegram_Object(Telegram::ID_DISPLAY, dobj);
+	objTelegram->setSource(this->espi->getUniqueIdentifier());
+	objTelegram->setType(Telegram::DISPLAYDATA);
+	this->espi->send(objTelegram);
+	delete dobj;
+	delete objTelegram;
 }
 
 int DotMatrixClient::getXResolution()
